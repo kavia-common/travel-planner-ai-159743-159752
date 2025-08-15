@@ -1,13 +1,16 @@
-const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_TOKEN;
+import { env, getDemoMode } from '../config/env';
 
 // PUBLIC_INTERFACE
 export async function geocodePlace(query) {
-  /** Geocode a place name to {lng, lat, place}. */
-  if (!MAPBOX_TOKEN) {
-    // Simple fallback guessing coords
-    return { lng: 0, lat: 0, place: query };
+  /** Geocode a place name to {lng, lat, place}. Falls back to demo coordinates when in demo mode or token missing. */
+  if (getDemoMode() || !env.MAPBOX_TOKEN) {
+    // Simple deterministic demo fallback coords (shift by hash of query for variation)
+    const hash = (query || '').split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+    const lng = ((hash % 180) - 90) / 2; // -45..45
+    const lat = ((hash % 140) - 70) / 2;  // -35..35
+    return { lng, lat, place: query };
   }
-  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?proximity=ip&limit=1&access_token=${MAPBOX_TOKEN}`;
+  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?proximity=ip&limit=1&access_token=${env.MAPBOX_TOKEN}`;
   const resp = await fetch(url);
   if (!resp.ok) return null;
   const data = await resp.json();

@@ -1,11 +1,10 @@
-const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
-const OPENAI_BASE_URL = process.env.REACT_APP_OPENAI_BASE_URL || 'https://api.openai.com/v1';
-const OPENAI_MODEL = process.env.REACT_APP_OPENAI_MODEL || 'gpt-4o-mini';
+import { env, getDemoMode } from '../config/env';
 
 // PUBLIC_INTERFACE
 export async function generateItinerary({ destination, dates, preferences, weather, events }) {
-  /** Generate a JSON itinerary using OpenAI based on inputs. */
-  if (!OPENAI_API_KEY) {
+  /** Generate a JSON itinerary using OpenAI based on inputs. Falls back to demo data if demo mode is active or API key missing. */
+  const demo = getDemoMode();
+  if (demo || !env.OPENAI_API_KEY) {
     // Demo fallback
     return demoItinerary(destination);
   }
@@ -25,14 +24,14 @@ Preferences: ${JSON.stringify(preferences)}
 Weather summary: ${weather?.summary || 'unknown'}
 Upcoming events (sample): ${(events || []).slice(0,3).map(e=>`${e.name} on ${e.date}`).join('; ')}`;
 
-  const resp = await fetch(`${OPENAI_BASE_URL}/chat/completions`, {
+  const resp = await fetch(`${env.OPENAI_BASE_URL}/chat/completions`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${OPENAI_API_KEY}`,
+      'Authorization': `Bearer ${env.OPENAI_API_KEY}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: OPENAI_MODEL,
+      model: env.OPENAI_MODEL,
       messages: [
         { role: 'system', content: system },
         { role: 'user', content: user }
@@ -71,7 +70,7 @@ function demoItinerary(destination) {
       ]},
       { day: 2, items: [
         { time:'Morning', title:'Museum Visit', description:'Explore art and culture.', location:`${destination} Museum` },
-        { time:'Afternoon', title:'Park Relax', description:'Picnic at the city park.', location:`${destination} Central Park` },
+        { time:'Afternoon', title:'Park Relax', description:'Picnic at the city park.' , location:`${destination} Central Park`},
         { time:'Evening', title:'Nightlife', description:'Try a local bar district.', location:`${destination} Nightlife` }
       ]}
     ],

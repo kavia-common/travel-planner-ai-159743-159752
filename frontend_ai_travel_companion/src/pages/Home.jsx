@@ -9,6 +9,7 @@ import { fetchWeatherByCoords } from '../services/weather';
 import { fetchEvents } from '../services/events';
 import { generateItinerary } from '../services/openai';
 import { extractLocationsFromItinerary } from '../utils/itineraryUtils';
+import { getDemoMode } from '../config/env';
 
 // PUBLIC_INTERFACE
 export default function Home() {
@@ -66,6 +67,8 @@ export default function Home() {
     itinerary: itinerary
   } : null;
 
+  const demo = getDemoMode();
+
   return (
     <div>
       <div className="search-area">
@@ -79,7 +82,10 @@ export default function Home() {
           <div className="card" style={{padding:12, marginBottom:12}}>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
               <div>
-                <strong>Recommendations</strong>
+                <strong style={{display:'inline-flex', alignItems:'center', gap:8}}>
+                  Recommendations
+                  {demo ? <span className="tag">🧪 Demo data</span> : null}
+                </strong>
                 <div className="subtitle">{loading ? 'Generating itinerary...' : (weather?.summary ? `Weather: ${weather.summary}` : 'Enter a destination to begin')}</div>
               </div>
               <div style={{display:'flex', alignItems:'center', gap:8}}>
@@ -103,7 +109,10 @@ export default function Home() {
           </div>
 
           <div style={{marginTop:16}}>
-            <div style={{fontWeight:700, marginBottom:8}}>Local Events</div>
+            <div style={{fontWeight:700, marginBottom:8, display:'flex', alignItems:'center', gap:8}}>
+              <span>Local Events</span>
+              {demo ? <span className="tag">🧪 Demo data</span> : null}
+            </div>
             <div style={{display:'grid', gap:12}}>
               {events.map((e,idx)=><EventCard key={idx} event={e} />)}
               {!events.length && !loading ? <div className="card" style={{padding:14, color:'var(--muted)'}}>No events found for your dates.</div> : null}

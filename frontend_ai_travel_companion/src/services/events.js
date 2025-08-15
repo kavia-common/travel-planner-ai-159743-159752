@@ -1,25 +1,28 @@
-const TM_API_KEY = process.env.REACT_APP_TICKETMASTER_API_KEY;
-const EB_TOKEN = process.env.REACT_APP_EVENTBRITE_TOKEN;
+import { env, getDemoMode } from '../config/env';
 
 // PUBLIC_INTERFACE
 export async function fetchEvents({ city, startDate, endDate }) {
-  /** Fetch events from Ticketmaster and Eventbrite. Returns normalized list. */
+  /** Fetch events from Ticketmaster and Eventbrite. Returns normalized list. Falls back to demo events if demo mode is active or both provider keys are missing. */
   const out = [];
   const tasks = [];
 
-  if (TM_API_KEY) {
-    tasks.push(fetchTicketmaster({ city, startDate, endDate }).then(list => out.push(...list)).catch(()=>{}));
-  }
-  if (EB_TOKEN) {
-    tasks.push(fetchEventbrite({ city, startDate, endDate }).then(list => out.push(...list)).catch(()=>{}));
-  }
+  const demo = getDemoMode();
+  const hasTM = !!env.TICKETMASTER_API_KEY;
+  const hasEB = !!env.EVENTBRITE_TOKEN;
 
-  if (!TM_API_KEY && !EB_TOKEN) {
-    // Demo fallback
+  if (demo || (!hasTM && !hasEB)) {
     return [
       { name: 'Street Food Festival', venue: 'Main Square', date: startDate, url: '#' },
-      { name: 'Live Jazz Night', venue: 'Blue Note Club', date: endDate, url: '#' }
+      { name: 'Live Jazz Night', venue: 'Blue Note Club', date: endDate, url: '#' },
+      { name: 'Open-Air Cinema', venue: 'Riverside Park', date: startDate, url: '#' },
     ];
+  }
+
+  if (hasTM) {
+    tasks.push(fetchTicketmaster({ city, startDate, endDate }).then(list => out.push(...list)).catch(()=>{}));
+  }
+  if (hasEB) {
+    tasks.push(fetchEventbrite({ city, startDate, endDate }).then(list => out.push(...list)).catch(()=>{}));
   }
 
   await Promise.all(tasks);
@@ -28,7 +31,7 @@ export async function fetchEvents({ city, startDate, endDate }) {
 
 async function fetchTicketmaster({ city, startDate, endDate }) {
   const params = new URLSearchParams({
-    apikey: TM_API_KEY,
+    apikey: env.TICKETMASTER_API_KEY,
     size: '5',
     sort: 'date,asc',
     city: city || '',
@@ -56,7 +59,7 @@ async function fetchEventbrite({ city, startDate, endDate }) {
     'page_size': '5'
   });
   const url = `https://www.eventbriteapi.com/v3/events/search/?${params.toString()}`;
-  const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${EB_TOKEN}` }});
+  const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${env.EVENTBRITE_TOKEN}` }});
   if (!resp.ok) return [];
   const data = await resp.json();
   const events = data?.events || [];

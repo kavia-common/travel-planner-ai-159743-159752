@@ -1,17 +1,19 @@
 import React, { useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
+import { env, getDemoMode } from '../config/env';
 
 // PUBLIC_INTERFACE
 export default function MapView({ center, markers }) {
-  /** Mapbox map showing markers for recommended spots. */
+  /** Mapbox map showing markers for recommended spots. Shows a demo placeholder when in demo mode or token missing. */
   const mapRef = useRef(null);
   const containerRef = useRef(null);
-  const token = process.env.REACT_APP_MAPBOX_TOKEN;
+  const token = env.MAPBOX_TOKEN;
+  const demo = getDemoMode();
 
   useEffect(() => {
-    if (!token) {
+    if (demo || !token) {
       // eslint-disable-next-line no-console
-      console.warn('Mapbox token missing. Provide REACT_APP_MAPBOX_TOKEN in .env');
+      if (!token) console.warn('Mapbox token missing. Provide REACT_APP_MAPBOX_TOKEN (or ACCESS_TOKEN) in .env');
       return;
     }
     mapboxgl.accessToken = token;
@@ -41,7 +43,23 @@ export default function MapView({ center, markers }) {
     });
 
     return () => map.remove();
-  }, [center, markers, token]);
+  }, [center, markers, token, demo]);
+
+  if (demo || !token) {
+    return (
+      <div className="map-container card" style={{display:'flex', alignItems:'center', justifyContent:'center', position:'relative'}}>
+        <div style={{position:'absolute', top:12, left:12}} className="tag">🧪 Demo Map</div>
+        <div style={{textAlign:'center', color:'var(--muted)'}}>
+          Map preview is disabled in demo mode.
+          <div style={{marginTop:8, fontSize:12}}>
+            {Array.isArray(markers) && markers.length ? (
+              <div>Sample locations: {markers.slice(0,3).map(m => m.label || 'Location').join(', ')}{markers.length > 3 ? '…' : ''}</div>
+            ) : 'No markers to display yet.'}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return <div className="map-container card" ref={containerRef} />;
 }

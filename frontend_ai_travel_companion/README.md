@@ -13,33 +13,50 @@ A minimalist, pastel-themed React app that helps plan personalized trips with AI
 - Smooth page transitions (Framer Motion)
 - Auto theme with a manual toggle (light/dark)
 
-## Setup
+## Quick Start
 1. Install dependencies
    ```bash
    npm install
    ```
-2. Copy .env example and fill your keys
+2. Copy the environment file and (optionally) fill your keys
    ```bash
    cp .env.example .env
-   # Open .env and set:
-   # REACT_APP_OPENAI_API_KEY=...
-   # REACT_APP_MAPBOX_TOKEN=...
-   # REACT_APP_WEATHER_API_KEY=...
-   # REACT_APP_TICKETMASTER_API_KEY=...
-   # REACT_APP_EVENTBRITE_TOKEN=...
+   # Open .env and set values as needed (see below)
    ```
 3. Start the app
    ```bash
    npm start
    ```
 
-## Environment Variables
-See .env.example for all required keys. All keys are read via process.env.
+## Demo Mode
+This app supports a fully functional demo mode with sample data for itineraries, weather, events, and maps. Demo mode is enabled automatically if required API keys are missing, or explicitly via:
+```
+REACT_APP_DEMO_MODE=true
+```
+When demo mode is active, a "Demo Mode" badge is shown in the header, the map displays a placeholder, and sections are tagged with "Demo data".
 
-Important: Calling third-party APIs directly from the frontend exposes keys to users. For production, you should route these calls through a backend proxy with proper authentication.
+## Environment Variables
+The app reads multiple commonly used variable names for convenience. You can use either the REACT_APP_* names or the alternates:
+
+- OpenAI
+  - REACT_APP_OPENAI_API_KEY or OPENAI_API_KEY
+  - REACT_APP_OPENAI_BASE_URL or OPENAI_BASE_URL (default: https://api.openai.com/v1)
+  - REACT_APP_OPENAI_MODEL or OPENAI_MODEL (default: gpt-4o-mini)
+- Mapbox
+  - REACT_APP_MAPBOX_TOKEN or REACT_APP_MAPBOX_ACCESS_TOKEN or MAPBOX_ACCESS_TOKEN
+- OpenWeatherMap
+  - REACT_APP_WEATHER_API_KEY or REACT_APP_OPENWEATHERMAP_API_KEY or OPENWEATHERMAP_API_KEY
+- Ticketmaster
+  - REACT_APP_TICKETMASTER_API_KEY or TICKETMASTER_API_KEY
+- Eventbrite
+  - REACT_APP_EVENTBRITE_TOKEN or REACT_APP_EVENTBRITE_API_KEY or EVENTBRITE_API_KEY
+- Demo flag
+  - REACT_APP_DEMO_MODE or DEMO_MODE
+
+Important: Calling third-party APIs directly from the frontend exposes keys to users. For production, route calls through a backend proxy with proper authentication.
 
 ## Tech
-- React 18, react-router-dom 6, framer-motion, mapbox-gl, axios/dayjs
+- React 18, react-router-dom 6, framer-motion, mapbox-gl
 - No heavy UI framework; clean pastel design with rounded cards.
 
 ## Development

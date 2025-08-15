@@ -6,6 +6,7 @@ import './App.css';
 import Home from './pages/Home';
 import MyTrips from './pages/MyTrips';
 import FloatingTripsButton from './components/FloatingTripsButton';
+import { getDemoMode } from './config/env';
 
 // PUBLIC_INTERFACE
 function ThemeToggle({ theme, onToggle }) {
@@ -20,6 +21,7 @@ function ThemeToggle({ theme, onToggle }) {
 // PUBLIC_INTERFACE
 function Shell({ children, theme, onToggle }) {
   /** App shell with side navigation and header. */
+  const demo = getDemoMode();
   return (
     <div className="app-shell">
       <aside className="side-nav">
@@ -39,7 +41,10 @@ function Shell({ children, theme, onToggle }) {
       <div className="content">
         <div className="header">
           <div>
-            <div className="title">AI Travel Companion</div>
+            <div className="title" style={{display:'flex', alignItems:'center', gap:8}}>
+              AI Travel Companion
+              {demo ? <span className="tag" title="Demo mode uses sample data for APIs">🧪 Demo Mode</span> : null}
+            </div>
             <div className="subtitle">Plan trips with AI itineraries, weather insights, maps and events</div>
           </div>
           <ThemeToggle theme={theme} onToggle={onToggle} />
